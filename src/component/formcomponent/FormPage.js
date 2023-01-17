@@ -1,11 +1,12 @@
 import './FormPage.css';
 import { useState,useEffect } from 'react';
 import logo1 from './sign.png';
+import AddressBookService from '../../service/AddressBookService';
 
 
 const FormPage = () => {
     let initialValue = {
-      name: "",
+      fullName: "",
       address: "",
       state: "",
       city: "",
@@ -14,7 +15,7 @@ const FormPage = () => {
       emailId: "",
       gender: "",
       notes: "",
-      id: "",
+      personId: "",
     };
   
     const [formValue, setForm] = useState(initialValue);
@@ -34,18 +35,26 @@ const FormPage = () => {
       event.preventDefault();
   
       let object = {
-        name: formValue.name,
+        fullName: formValue.name,
         address: formValue.address,
       state: formValue.state,
       city: formValue.city,
       pinCode: formValue.pinCode,
-      phoneNumber: formValue.phoneNumber,
-      emailId: formValue.emailId,
+      phoneNum: formValue.phoneNumber,
+      email: formValue.emailId,
       gender: formValue.gender,
       notes: formValue.notes,
       };
-  
-      console.log(object);
+
+       console.log(object);
+       AddressBookService.createAddressBookData(object)
+       .then((response) =>{
+        alert("Person Data Added Successfully");
+        console.log(response);
+       })
+       .catch((error)=>{
+        alert("Somethimng Went Wrong",error)
+       });
     };
   
     const reset = () => {
@@ -169,4 +178,4 @@ const FormPage = () => {
           </div>
       );
   }
-  export default FormPage;
+  export default FormPage
