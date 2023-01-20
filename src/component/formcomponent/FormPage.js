@@ -2,7 +2,7 @@ import './FormPage.css';
 import { useState,useEffect } from 'react';
 import logo1 from './sign.png';
 import AddressBookService from '../../service/AddressBookService';
-
+import { Link, useParams } from 'react-router-dom';
 
 const FormPage = () => {
     let initialValue = {
@@ -11,14 +11,53 @@ const FormPage = () => {
       state: "",
       city: "",
       pinCode: "",
-      phoneNumber: "",
-      emailId: "",
+      phoneNum: "",
+      email: "",
       gender: "",
       notes: "",
       personId: "",
+      isUpdate:false,
     };
   
     const [formValue, setForm] = useState(initialValue);
+    const params =useParams();
+
+    useEffect(() => {
+      console.log("Hello")
+      if (params.id){
+        getDataById(params.id);
+      }
+    }, [params.id]);
+
+    const getDataById = (id)=>{
+      AddressBookService.getAllAddressBookDataById(id)
+           .then((respone) => {
+            let object = respone.data.object;
+            setData(object);
+           })
+           .catch((err) => {
+            alert("err is" ,err);
+           })
+    };
+    const setData = (obj) => {
+      console.log(obj);
+  
+      setForm ({
+        ...formValue,
+        ...obj,
+        fullName :obj.fullName,
+        personId:obj.personId,
+        address: obj.address,
+      state: obj.state,
+      city: obj.city,
+      pincode: obj.pincode,
+      phoneNum: obj.phoneNum,
+      email: obj.email,
+      gender: obj.gender,
+      notes: obj.notes,
+      isUpdate: true,
+      });
+    };
   
     const changeValue = (event) => {
       console.log(event.target);
@@ -26,36 +65,54 @@ const FormPage = () => {
       setForm({ ...formValue, [event.target.name]: event.target.value });
     };
   
-    useEffect(() => {
-      console.log("Useeffect()");
-    }, []);
-  
-  
+    // useEffect(() => {
+    //   console.log("Useeffect()");
+    // }, []);
+
     const save = async (event) => {
       event.preventDefault();
   
       let object = {
-        fullName: formValue.name,
+        fullName: formValue.fullName,
         address: formValue.address,
       state: formValue.state,
       city: formValue.city,
       pinCode: formValue.pinCode,
-      phoneNum: formValue.phoneNumber,
-      email: formValue.emailId,
+      phoneNum: formValue.phoneNum,
+      email: formValue.email,
       gender: formValue.gender,
       notes: formValue.notes,
       };
+      console.log(object);
 
-       console.log(object);
+    if (formValue.isUpdate) {
+      var answer = window.confirm(
+        "Data once modified cannot be restored!! Do you wish to continue?"
+      );
+      if (answer === true) {
+        AddressBookService. updateAddressBookById(params.id, object)
+          .then((data) => {
+            console.log(data.data.data);
+            alert("Data updated successfully!");
+          })
+          .catch((error) => {
+            console.log("WARNING!! Error updating the data!", error);
+          });
+      } else {
+        window.location.reload();
+      }
+    } else {
+    
        AddressBookService.createAddressBookData(object)
        .then((response) =>{
         alert("Person Data Added Successfully");
-        console.log(response);
+        console.log(response.data.object);
        })
        .catch((error)=>{
         alert("Somethimng Went Wrong",error)
        });
     };
+  }
   
     const reset = () => {
       setForm({
@@ -177,5 +234,6 @@ const FormPage = () => {
             </form>  
           </div>
       );
-  }
-  export default FormPage
+  
+}
+  export default FormPage;
